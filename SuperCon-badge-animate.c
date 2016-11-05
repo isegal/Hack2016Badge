@@ -71,40 +71,47 @@ void drawArrow(uint8_t rightOrLeft) {
     //1 == left
     if (rightOrLeft) {
         Buffer[11] = 0b00100000;
-        Buffer[12] = 0b01000000;
+        Buffer[12] = 0b01110000;
         Buffer[13] = 0b11111111;
-        Buffer[14] = 0b01000000;
+        Buffer[14] = 0b01110000;
         Buffer[15] = 0b00100000;
     }
     else {
         Buffer[11] = 0b00000100;
-        Buffer[12] = 0b00000010;
+        Buffer[12] = 0b00001110;
         Buffer[13] = 0b11111111;
-        Buffer[14] = 0b00000010;
+        Buffer[14] = 0b00001110;
         Buffer[15] = 0b00000100;
     }
     displayLatch();
 }
 
+extern uint8_t Retro8x16[1524];
+void drawChar(uint8_t charOffset) {
+    for(uint8_t i = 0; i < 16; ++i) {
+        Buffer[i] = Retro8x16[charOffset + i];
+    }
+}
+
 void animateBadge(void) {
-    displayPixel(ballX, ballY, ON);
-    displayLatch();
+    //displayPixel(ballX, ballY, ON);
+    //displayLatch();
     uint32_t nextTime = getTime();
 
     while(1) {
         
         //This shows how to use non-blocking getTime() function
-        if (getTime() > nextTime) {
-            nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
-            Buffer[8] ^= 0xFF;  //Toggle a whole row
-            Buffer[9] ^= 0xFF;  //Toggle a whole row
-            displayLatch();     //Make sure changes to the buffer show up on the display
-        }
+//        if (getTime() > nextTime) {
+//            nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
+//            Buffer[8] ^= 0xFF;  //Toggle a whole row
+//            Buffer[9] ^= 0xFF;  //Toggle a whole row
+//            displayLatch();     //Make sure changes to the buffer show up on the display
+//        }
 
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
-        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
-        else { drawArrow(0); }
+//        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
+//        else { drawArrow(0); }
         
         //This shows how to get user input
         switch (getControl()) {
@@ -124,5 +131,7 @@ void animateBadge(void) {
                 moveDown();
                 break;
         }
+        
+        drawChar(36);
     }
 }
