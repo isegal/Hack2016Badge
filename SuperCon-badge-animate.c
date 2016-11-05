@@ -96,6 +96,7 @@ void drawChar(uint8_t charOffset) {
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
+    uint8_t currChar = 0;
     uint32_t nextTime = getTime();
 
     while(1) {
@@ -126,12 +127,14 @@ void animateBadge(void) {
                 break;
             case (UP):
                 moveUp();
+                ++currChar;
                 break;
             case (DOWN):
                 moveDown();
+                --currChar;
                 break;
         }
         
-        drawChar(36);
+        drawChar(currChar);
     }
 }
