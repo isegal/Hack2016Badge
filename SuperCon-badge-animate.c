@@ -14,9 +14,18 @@
 
 #include "HaD_Badge.h"
 
-uint8_t ballX = 4;
-uint8_t ballY = 8;
-uint8_t gapSize = 2;
+#define FP_SHIFT 8 // 2^8 = 256
+#define FP_MASK ((1 << FP_SHIFT) - 1) // 256 (all LSB set, all MSB clear)
+#define FP_INTEGER_PART(arg) (arg >> FP_SHIFT)
+#define FP_FRACTION_PART(arg) (arg & FP_MASK)
+
+
+uint16_t ballX = (4<<FP_SHIFT);
+uint16_t ballY = (8<<FP_SHIFT);
+
+uint8_t lastBallX = 0;
+uint8_t lastBallY = 0;
+
 const char msg[] = "HELLOZHOUTHISISIV";
 
 
@@ -24,56 +33,49 @@ const char msg[] = "HELLOZHOUTHISISIV";
 
 void eraseBall() {
     //uses global variables to erase current ball
-    displayPixel(ballX, ballY, OFF);
+    displayPixel(lastBallX, ballY, OFF);
     displayLatch();
 }
 
-uint8_t isLit(uint8_t x, uint8_t y) {
-    if (Buffer[y] & (1 << (7 - x))) {
-        return 1;
+
+void updateBall() {
+    uint8_t curX = FP_INTEGER_PART(ballX);
+    uint8_t curY = FP_INTEGER_PART(ballY);
+    if(curX != lastBallX || curY != lastBallY) {
+        displayPixel(lastBallX, lastBallY, OFF);
+        displayPixel(curX, curY, ON);
+        lastBallX = curX;
+        lastBallY = curY;
     }
-    return 0;
 }
 
-
 void moveLeft() {
-    if (ballX > 0 && !isLit(ballX - 1, ballY)) {
+    if (FP_INTEGER_PART(ballX) > 0) {
         //only move if we're not already at the edge
-        eraseBall();
         --ballX;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
     }
 }
 
 void moveRight() {
-    if (ballX < TOTPIXELX-1 && !isLit(ballX + 1, ballY)) {
+    if (FP_INTEGER_PART(ballX) < TOTPIXELX-1) {
         //only move if we're not already at the edge
-        eraseBall();
         ++ballX;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
     }
 }
 
 void moveUp() {
-    if (ballY > 0 && !isLit(ballX, ballY - 1)) {
+    if (FP_INTEGER_PART(ballY) > 0) {
         //only move if we're not already at the edge
-        eraseBall();
         --ballY;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
     }
 }
 
 void moveDown() {
     //Limit ball travel to top 8 rows of the screen
-    if (ballY < TOTPIXELY - 1 && !isLit(ballX, ballY + 1)) {
+    if (FP_INTEGER_PART(ballY) < TOTPIXELY - 1) {
         //only move if we're not already at the edge
-        eraseBall();
         ++ballY;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
+
     }
 }
 
@@ -133,10 +135,11 @@ void animateBadge(void) {
     int8_t charColumn = 0;
     int8_t deltaAcc = 0;
     int16_t deltaTime = 100;
+    
+    updateBall();
     while(1) {
 //        drawLineWithGap(5);
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
+        
         //This shows how to use non-blocking getTime() function
         if (getTime() <= nextTime) {
             continue;
@@ -158,6 +161,9 @@ void animateBadge(void) {
             moveDown();
         }
         nextTime = getTime()+deltaTime;
+        
+        updateBall();
+        
         //Buffer[1] = AccXhigh;
         //Buffer[3] = AccYhigh;
         //Buffer[5] = AccZhigh;
@@ -215,11 +221,11 @@ void animateBadge(void) {
                 break;
             case (UP):
                 //moveUp();
-                deltaTime += 20;
+                //deltaTime += 20;
                 break;
             case (DOWN):
                 //moveDown();
-                deltaTime -= 20;
+                //deltaTime -= 20;
                 break;
         }
         
