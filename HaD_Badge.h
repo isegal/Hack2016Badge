@@ -148,9 +148,9 @@ volatile uint16_t MySerial  @ 0x1A;     //MySerial(2 bytes) unit serial number c
 volatile uint16_t FSR0temp  @ 0x1C;     //FSR0temp(2 bytes) Temporary FSR0 during INT
 volatile uint8_t AccXlow @ 0x1E;          //Accelerometer X	(keep order!)
 volatile uint8_t AccXhigh @ 0x1F;
-volatile uint16_t AccYlow @ 0x20;          //Accelerometer Y	(keep order!)
+volatile uint8_t AccYlow @ 0x20;          //Accelerometer Y	(keep order!)
 volatile uint8_t AccYhigh @ 0x21;
-volatile uint16_t AccZlow @ 0x22;          //Accelerometer Z	(keep order!)
+volatile uint8_t AccZlow @ 0x22;          //Accelerometer Z	(keep order!)
 volatile uint8_t AccZhigh @ 0x23;
 /*******************   0x1C...0x5FF User data RAM space ***********************/
 volatile uint8_t RXBuffer[256]  @ 0x600;//0x600...0x6FF RX Buffer, used by infrared port routine(bytes loaded here)

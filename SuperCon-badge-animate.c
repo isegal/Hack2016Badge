@@ -96,28 +96,66 @@ void drawChar(uint8_t currPos) {
         Buffer[i] = Retro8x16[charOffset + i];
     }
 }
-
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
     uint8_t currChar = 0;
     //uint8_t currChar = 'A';
     uint32_t nextTime = getTime();
+    
+    int16_t tempMinAccel = 0;
+    int16_t tempMaxAccel = 0;
+    
+    int16_t minAccel = 0;
+    int16_t maxAccel = 0;
+    
+    int16_t xAccel;
+    
+    int8_t charColumn = 0;
 
     while(1) {
         
         //This shows how to use non-blocking getTime() function
-//        if (getTime() > nextTime) {
-//            nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
-//            Buffer[8] ^= 0xFF;  //Toggle a whole row
-//            Buffer[9] ^= 0xFF;  //Toggle a whole row
-//            displayLatch();     //Make sure changes to the buffer show up on the display
-//        }
 
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
 //        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
 //        else { drawArrow(0); }
+        
+        xAccel = (((int16_t)(AccXhigh)));
+        
+        if (xAccel > tempMaxAccel) {
+          tempMaxAccel = xAccel;
+        }
+        
+        if (xAccel < tempMinAccel) {
+          tempMinAccel = xAccel;
+        }
+        
+        if (getTime() > nextTime) {
+            minAccel = tempMinAccel;
+            maxAccel = tempMaxAccel;
+            tempMinAccel = 0;
+            tempMaxAccel = 0;
+            
+            nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
+            // displayLatch();     //Make sure changes to the buffer show up on the display
+        }
+        
+//        normal_accel = image_num_lines + swing_direction - (int) (floor((accelG-min_accel)*(image_num_lines-1)/(max_accel-min_accel)));
+//  if (normal_accel < 0){normal_accel = 0;} //ensure we don't try to get a negative array index
+//  else if (normal_accel > image_num_lines - 1){normal_accel = image_num_lines - 1;}
+        
+        charColumn = (xAccel - minAccel)*(sizeof(msg)-1)/maxAccel-minAccel;
+        
+        if(charColumn < 0) charColumn = 0;
+        if(charColumn >= sizeof(msg)) charColumn = sizeof(msg)-1;
+        
+        drawChar(charColumn);
+        
+        //Buffer[0] = AccXlow;
+        //Buffer[1] = AccXhigh;
+        
         //This shows how to get user input
         switch (getControl()) {
             case (ESCAPE):
@@ -142,6 +180,6 @@ void animateBadge(void) {
                 break;
         }
         
-        drawChar(currChar);
+        // drawChar(currChar);
     }
 }
