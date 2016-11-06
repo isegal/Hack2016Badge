@@ -87,7 +87,8 @@ void drawArrow(uint8_t rightOrLeft) {
 }
 
 extern uint8_t Retro8x16[1524];
-void drawChar(uint8_t charOffset) {
+void drawChar(uint8_t dispChar) {
+    uint16_t charOffset = (dispChar-65) * 16;
     for(uint8_t i = 0; i < 16; ++i) {
         Buffer[i] = Retro8x16[charOffset + i];
     }
@@ -96,7 +97,7 @@ void drawChar(uint8_t charOffset) {
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
-    uint8_t currChar = 0;
+    uint8_t currChar = 'A';
     uint32_t nextTime = getTime();
 
     while(1) {
