@@ -15,7 +15,7 @@
 #include "HaD_Badge.h"
 
 uint8_t ballX = 4;
-uint8_t ballY = 3;
+uint8_t ballY = 8;
 const char msg[] = "HELLOZHOUTHISISIV";
 
 
@@ -59,7 +59,7 @@ void moveUp() {
 
 void moveDown() {
     //Limit ball travel to top 8 rows of the screen
-    if (ballY < TOTPIXELY-9) {
+    if (ballY < TOTPIXELY - 1) {
         //only move if we're not already at the edge
         eraseBall();
         ++ballY;
@@ -112,46 +112,70 @@ void animateBadge(void) {
     int16_t xAccel;
     
     int8_t charColumn = 0;
-
+    int8_t deltaAcc = 0;
+    int16_t deltaTime = 100;
     while(1) {
-        
+        displayPixel(ballX, ballY, ON);
+        displayLatch();
         //This shows how to use non-blocking getTime() function
-
+        if (getTime() <= nextTime) {
+            continue;
+        }
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
+        if (AccXhigh < 0xF0 && AccXhigh >= 0x01) {
+            moveLeft();
+            //deltaAcc = 0xF0 - AccXhigh;
+        }
+        if (AccXhigh > 0xF0 && AccXhigh <= 0xFE) {
+            moveRight();
+            //deltaAcc = 0xFF - AccXhigh;
+        }
+        if (AccYhigh < 0xF0 && AccYhigh >= 0x01) {
+            moveUp();   
+            
+        }
+        if (AccYhigh > 0xF0 && AccYhigh <= 0xFE) {
+            moveDown();
+        }
+        //deltaTime = 
+        nextTime = getTime()+deltaTime;
+        //Buffer[1] = AccXhigh;
+        //Buffer[3] = AccYhigh;
+        //Buffer[5] = AccZhigh;
 //        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
 //        else { drawArrow(0); }
         
-        xAccel = (((int16_t)(AccXhigh)));
+        //xAccel = (((int16_t)(AccXhigh)));
         
-        if (xAccel > tempMaxAccel) {
-          tempMaxAccel = xAccel;
-        }
+        //if (xAccel > tempMaxAccel) {
+          //tempMaxAccel = xAccel;
+        //}
         
-        if (xAccel < tempMinAccel) {
-          tempMinAccel = xAccel;
-        }
+        //if (xAccel < tempMinAccel) {
+          //tempMinAccel = xAccel;
+        //}
         
-        if (getTime() > nextTime) {
-            minAccel = tempMinAccel;
-            maxAccel = tempMaxAccel;
-            tempMinAccel = 0;
+        //if (getTime() > nextTime) {
+          //  minAccel = tempMinAccel;
+            //maxAccel = tempMaxAccel;
+            //tempMinAccel = 0;
             tempMaxAccel = 0;
             
-            nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
+           // nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
             // displayLatch();     //Make sure changes to the buffer show up on the display
-        }
+        //}
         
 //        normal_accel = image_num_lines + swing_direction - (int) (floor((accelG-min_accel)*(image_num_lines-1)/(max_accel-min_accel)));
 //  if (normal_accel < 0){normal_accel = 0;} //ensure we don't try to get a negative array index
 //  else if (normal_accel > image_num_lines - 1){normal_accel = image_num_lines - 1;}
         
-        charColumn = (xAccel - minAccel)*(sizeof(msg)-1)/maxAccel-minAccel;
+       // charColumn = (xAccel - minAccel)*(sizeof(msg)-1)/maxAccel-minAccel;
         
-        if(charColumn < 0) charColumn = 0;
-        if(charColumn >= sizeof(msg)) charColumn = sizeof(msg)-1;
+        //if(charColumn < 0) charColumn = 0;
+       // if(charColumn >= sizeof(msg)) charColumn = sizeof(msg)-1;
         
-        drawChar(charColumn);
+        //drawChar(charColumn);
         
         //Buffer[0] = AccXlow;
         //Buffer[1] = AccXhigh;
@@ -172,11 +196,12 @@ void animateBadge(void) {
                 ++currChar;
                 break;
             case (UP):
-                moveUp();
-                
+                //moveUp();
+                deltaTime += 20;
                 break;
             case (DOWN):
-                moveDown();
+                //moveDown();
+                deltaTime -= 20;
                 break;
         }
         
