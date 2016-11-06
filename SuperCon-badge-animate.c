@@ -26,8 +26,7 @@ uint16_t ballY = (8<<FP_SHIFT);
 uint8_t lastBallX = 0;
 uint8_t lastBallY = 0;
 
-const char msg[] = "HELLOZHOUTHISISIV";
-
+uint8_t coef = 1;
 
 //Hint: look in HaD_Badge.h for function and constant definitions
 
@@ -52,21 +51,21 @@ void updateBall() {
 void moveLeft() {
     if (FP_INTEGER_PART(ballX) > 0) {
         //only move if we're not already at the edge
-        --ballX;
+        ballX -= AccXhigh * coef;
     }
 }
 
 void moveRight() {
     if (FP_INTEGER_PART(ballX) < TOTPIXELX-1) {
         //only move if we're not already at the edge
-        ++ballX;
+        ballX += (0xFF - AccXhigh) * coef;
     }
 }
 
 void moveUp() {
     if (FP_INTEGER_PART(ballY) > 0) {
         //only move if we're not already at the edge
-        --ballY;
+        ballY -= AccYhigh * coef;
     }
 }
 
@@ -74,7 +73,7 @@ void moveDown() {
     //Limit ball travel to top 8 rows of the screen
     if (FP_INTEGER_PART(ballY) < TOTPIXELY - 1) {
         //only move if we're not already at the edge
-        ++ballY;
+        ballY += (0xFF - AccYhigh) * coef;
 
     }
 }
@@ -100,23 +99,14 @@ void drawArrow(uint8_t rightOrLeft) {
 }
 
 extern uint8_t Retro8x16[1524];
-void drawChar(uint8_t currPos) {
-    uint8_t dispChar = msg[currPos];
-    uint16_t charOffset = (dispChar-65) * 16;
-    for(uint8_t i = 0; i < 16; ++i) {
-        Buffer[i] = Retro8x16[charOffset + i];
-    }
-}
-
-//void drawLineWithGap(uint8_t posY) {
-//    //uint8_t gapIndex = getTime() % (TOTPIXELX - 1);
-//    uint8_t gapIndex = 2;
-//    Buffer[posY] = 0;
-//    for (uint8_t i = 0; i < gapSize; i++) {
-//        Buffer[posY] |= (1 << (TOTPIXELX - gapIndex - 1 - i));
+//void drawChar(uint8_t currPos) {
+//    uint8_t dispChar = msg[currPos];
+//    uint16_t charOffset = (dispChar-65) * 16;
+//    for(uint8_t i = 0; i < 16; ++i) {
+//        Buffer[i] = Retro8x16[charOffset + i];
 //    }
-//    Buffer[posY] = ~Buffer[posY];
 //}
+
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
@@ -134,33 +124,29 @@ void animateBadge(void) {
     
     int8_t charColumn = 0;
     int8_t deltaAcc = 0;
-    int16_t deltaTime = 100;
+    //int16_t deltaTime = 100;
     
     updateBall();
     while(1) {
 //        drawLineWithGap(5);
-        
+
         //This shows how to use non-blocking getTime() function
-        if (getTime() <= nextTime) {
-            continue;
-        }
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
-        if (AccXhigh < 0xF0 && AccXhigh >= 0x01) {
+        if (AccXhigh < 0xF0) {
             moveLeft();
         }
-        if (AccXhigh > 0xF0 && AccXhigh <= 0xFE) {
+        if (AccXhigh > 0xF0) {
             moveRight();
-            //deltaAcc = 0xFF - AccXhigh;
         }
-        if (AccYhigh < 0xF0 && AccYhigh >= 0x01) {
+        if (AccYhigh < 0xF0) {
             moveUp();   
             
         }
-        if (AccYhigh > 0xF0 && AccYhigh <= 0xFE) {
+        if (AccYhigh > 0xF0) {
             moveDown();
         }
-        nextTime = getTime()+deltaTime;
+        //nextTime = getTime()+deltaTime;
         
         updateBall();
         
@@ -216,16 +202,16 @@ void animateBadge(void) {
                 break;
             case (RIGHT):
                 moveRight();
-                if (currChar < sizeof(msg))
-                ++currChar;
+//                if (currChar < sizeof(msg))
+//                ++currChar;
                 break;
             case (UP):
                 //moveUp();
-                //deltaTime += 20;
+                coef += 2;
                 break;
             case (DOWN):
                 //moveDown();
-                //deltaTime -= 20;
+                coef -= 2;
                 break;
         }
         
