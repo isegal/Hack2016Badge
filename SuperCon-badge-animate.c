@@ -17,84 +17,32 @@
 uint8_t ballX = 4;
 uint8_t ballY = 8;
 uint8_t gapSize = 2;
-const char msg[] = "HELLOZHOUTHISISIV";
+uint8_t HEIGHT = 35;
+uint8_t WIDTH = 45;
 
 
 //Hint: look in HaD_Badge.h for function and constant definitions
 
-void eraseBall() {
-    //uses global variables to erase current ball
-    displayPixel(ballX, ballY, OFF);
-    displayLatch();
-}
 
-void moveLeft() {
-    if (ballX > 0) {
-        //only move if we're not already at the edge
-        eraseBall();
-        --ballX;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
-    }
-}
-
-void moveRight() {
-    if (ballX < TOTPIXELX-1) {
-        //only move if we're not already at the edge
-        eraseBall();
-        ++ballX;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
-    }
-}
-
-void moveUp() {
-    if (ballY > 0) {
-        //only move if we're not already at the edge
-        eraseBall();
-        --ballY;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
-    }
-}
-
-void moveDown() {
-    //Limit ball travel to top 8 rows of the screen
-    if (ballY < TOTPIXELY - 1) {
-        //only move if we're not already at the edge
-        eraseBall();
-        ++ballY;
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
-    }
-}
-
-void drawArrow(uint8_t rightOrLeft) {
-    //0 == right
-    //1 == left
-    if (rightOrLeft) {
-        Buffer[11] = 0b00100000;
-        Buffer[12] = 0b01110000;
-        Buffer[13] = 0b11111111;
-        Buffer[14] = 0b01110000;
-        Buffer[15] = 0b00100000;
-    }
-    else {
-        Buffer[11] = 0b00000100;
-        Buffer[12] = 0b00001110;
-        Buffer[13] = 0b11111111;
-        Buffer[14] = 0b00001110;
-        Buffer[15] = 0b00000100;
-    }
-    displayLatch();
-}
-
-extern uint8_t Retro8x16[1524];
-void drawChar(uint8_t currPos) {
-    uint8_t dispChar = msg[currPos];
-    uint16_t charOffset = (dispChar-65) * 16;
-    for(uint8_t i = 0; i < 16; ++i) {
-        Buffer[i] = Retro8x16[charOffset + i];
+extern uint8_t maze[210];
+void drawMaze(uint8_t x, uint8_t y) {
+    
+    
+    
+    for (uint8_t i =  0; i < TOTPIXELY; i++ ) {
+        uint8_t byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + x / 8);
+        uint8_t bitOffset = x % 8;
+        if ((y + i) < 0 || (y + i > HEIGHT)) {
+            Buffer[i] = 0;
+        } else {
+            if (x < 0) {
+                Buffer[i] = maze[byteOffset] >> -1 * x;
+            } else if (x > WIDTH - 8) {
+                Buffer[i] = maze[byteOffset+1] << (x - WIDTH - 8);
+            } else {
+                Buffer[i] = maze[byteOffset] << bitOffset | maze[byteOffset+1] >> (8 - bitOffset);
+            }
+        }
     }
 }
 
@@ -110,8 +58,10 @@ void drawChar(uint8_t currPos) {
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
-    uint8_t currChar = 0;
-    //uint8_t currChar = 'A';
+
+    uint8_t x = 0;
+    uint8_t y = 0;
+    
     uint32_t nextTime = getTime();
     
     int16_t tempMinAccel = 0;
@@ -122,99 +72,72 @@ void animateBadge(void) {
     
     int16_t xAccel;
     
-    int8_t charColumn = 0;
-    int8_t deltaAcc = 0;
     int16_t deltaTime = 100;
     while(1) {
-//        drawLineWithGap(5);
-        displayPixel(ballX, ballY, ON);
-        displayLatch();
+
         //This shows how to use non-blocking getTime() function
+        
+        uint8_t direction;
         if (getTime() <= nextTime) {
             continue;
         }
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
         if (AccXhigh < 0xF0 && AccXhigh >= 0x01) {
-            moveLeft();
+            direction = LEFT;
+            
         }
         if (AccXhigh > 0xF0 && AccXhigh <= 0xFE) {
-            moveRight();
-            //deltaAcc = 0xFF - AccXhigh;
+            direction = RIGHT;
         }
         if (AccYhigh < 0xF0 && AccYhigh >= 0x01) {
-            moveUp();   
-            
+            direction = UP;
         }
         if (AccYhigh > 0xF0 && AccYhigh <= 0xFE) {
-            moveDown();
+            direction = DOWN;
         }
         nextTime = getTime()+deltaTime;
-        //Buffer[1] = AccXhigh;
-        //Buffer[3] = AccYhigh;
-        //Buffer[5] = AccZhigh;
-//        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
-//        else { drawArrow(0); }
+
         
-        //xAccel = (((int16_t)(AccXhigh)));
-        
-        //if (xAccel > tempMaxAccel) {
-          //tempMaxAccel = xAccel;
-        //}
-        
-        //if (xAccel < tempMinAccel) {
-          //tempMinAccel = xAccel;
-        //}
-        
-        //if (getTime() > nextTime) {
-          //  minAccel = tempMinAccel;
-            //maxAccel = tempMaxAccel;
-            //tempMinAccel = 0;
-            tempMaxAccel = 0;
-            
-           // nextTime = getTime()+1000;  //prepare next event for about 1000ms (1 second) from now
-            // displayLatch();     //Make sure changes to the buffer show up on the display
-        //}
-        
-//        normal_accel = image_num_lines + swing_direction - (int) (floor((accelG-min_accel)*(image_num_lines-1)/(max_accel-min_accel)));
-//  if (normal_accel < 0){normal_accel = 0;} //ensure we don't try to get a negative array index
-//  else if (normal_accel > image_num_lines - 1){normal_accel = image_num_lines - 1;}
-        
-       // charColumn = (xAccel - minAccel)*(sizeof(msg)-1)/maxAccel-minAccel;
-        
-        //if(charColumn < 0) charColumn = 0;
-       // if(charColumn >= sizeof(msg)) charColumn = sizeof(msg)-1;
-        
-        //drawChar(charColumn);
-        
-        //Buffer[0] = AccXlow;
-        //Buffer[1] = AccXhigh;
-        
-        //This shows how to get user input
         switch (getControl()) {
             case (ESCAPE):
                 displayClose();
                 return;
-            case (LEFT):
-                moveLeft();
-                if (currChar > 0)
-                --currChar;
-                break;
-            case (RIGHT):
-                moveRight();
-                if (currChar < sizeof(msg))
-                ++currChar;
-                break;
             case (UP):
-                //moveUp();
                 deltaTime += 20;
                 break;
             case (DOWN):
-                //moveDown();
                 deltaTime -= 20;
+                break;
+            default:
                 break;
         }
         
-        // drawChar(currChar);
+        switch(direction) {
+            case UP:
+                if (y > -3) {
+                    y--;
+                }
+                break;
+            case DOWN:
+                if (y < HEIGHT - 13) {
+                    y++;
+                }
+                break;
+            case RIGHT:
+                if (x < WIDTH - 5) {
+                    x++;
+                }
+                break;
+            case LEFT:
+                if (x > -3) {
+                    x--;
+                }
+                break;
+            default:
+                break;
+        }
+        drawMaze(x, y);
     }
 }
+
