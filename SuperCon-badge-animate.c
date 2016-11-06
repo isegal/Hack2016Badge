@@ -28,8 +28,16 @@ void eraseBall() {
     displayLatch();
 }
 
+uint8_t isLit(uint8_t x, uint8_t y) {
+    if (Buffer[y] & (1 << (7 - x))) {
+        return 1;
+    }
+    return 0;
+}
+
+
 void moveLeft() {
-    if (ballX > 0) {
+    if (ballX > 0 && !isLit(ballX - 1, ballY)) {
         //only move if we're not already at the edge
         eraseBall();
         --ballX;
@@ -39,7 +47,7 @@ void moveLeft() {
 }
 
 void moveRight() {
-    if (ballX < TOTPIXELX-1) {
+    if (ballX < TOTPIXELX-1 && !isLit(ballX + 1, ballY)) {
         //only move if we're not already at the edge
         eraseBall();
         ++ballX;
@@ -49,7 +57,7 @@ void moveRight() {
 }
 
 void moveUp() {
-    if (ballY > 0) {
+    if (ballY > 0 && !isLit(ballX, ballY - 1)) {
         //only move if we're not already at the edge
         eraseBall();
         --ballY;
@@ -60,7 +68,7 @@ void moveUp() {
 
 void moveDown() {
     //Limit ball travel to top 8 rows of the screen
-    if (ballY < TOTPIXELY - 1) {
+    if (ballY < TOTPIXELY - 1 && !isLit(ballX, ballY + 1)) {
         //only move if we're not already at the edge
         eraseBall();
         ++ballY;
