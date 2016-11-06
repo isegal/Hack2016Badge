@@ -26,38 +26,24 @@ uint8_t WIDTH = 45;
 
 extern uint8_t maze[210];
 void drawMaze(uint8_t x, uint8_t y) {
-    
-    
-    
-    for (uint8_t i =  0; i < TOTPIXELY; i++ ) {
-        uint8_t byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + x / 8);
-        uint8_t bitOffset = x % 8;
-        if ((y + i) < 0 || (y + i > HEIGHT)) {
-            Buffer[i] = 0;
+    for (uint8_t i = 0; i < TOTPIXELY; i++ ) {
+        if ((y + i) < 0) {
+            Buffer[i] = 1;
         } else {
-            if (x < 0) {
-                Buffer[i] = maze[byteOffset] >> -1 * x;
-            } else if (x > WIDTH - 8) {
-                Buffer[i] = maze[byteOffset+1] << (x - WIDTH - 8);
-            } else {
+            uint8_t byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + x / 8);
+            uint8_t bitOffset = x % 8;
+//            if (x < 0) {
+//                Buffer[i] = maze[byteOffset] >> -1 * x;
+//            } else if (x > WIDTH - 8) {
+//                Buffer[i] = maze[byteOffset+1] << (x - WIDTH - 8);
+//            } else {
                 Buffer[i] = maze[byteOffset] << bitOffset | maze[byteOffset+1] >> (8 - bitOffset);
-            }
+//            }
         }
     }
 }
 
-//void drawLineWithGap(uint8_t posY) {
-//    //uint8_t gapIndex = getTime() % (TOTPIXELX - 1);
-//    uint8_t gapIndex = 2;
-//    Buffer[posY] = 0;
-//    for (uint8_t i = 0; i < gapSize; i++) {
-//        Buffer[posY] |= (1 << (TOTPIXELX - gapIndex - 1 - i));
-//    }
-//    Buffer[posY] = ~Buffer[posY];
-//}
 void animateBadge(void) {
-    //displayPixel(ballX, ballY, ON);
-    //displayLatch();
 
     uint8_t x = 0;
     uint8_t y = 0;
@@ -120,17 +106,17 @@ void animateBadge(void) {
                 }
                 break;
             case DOWN:
-                if (y < HEIGHT - 13) {
+                if (y < HEIGHT - 16) {
                     y++;
                 }
                 break;
             case RIGHT:
-                if (x < WIDTH - 5) {
+                if (x < WIDTH - 8) {
                     x++;
                 }
                 break;
             case LEFT:
-                if (x > -3) {
+                if (x > 0) {
                     x--;
                 }
                 break;
