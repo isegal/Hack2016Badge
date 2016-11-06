@@ -16,6 +16,7 @@
 
 uint8_t ballX = 4;
 uint8_t ballY = 8;
+uint8_t gapSize = 2;
 const char msg[] = "HELLOZHOUTHISISIV";
 
 
@@ -96,6 +97,16 @@ void drawChar(uint8_t currPos) {
         Buffer[i] = Retro8x16[charOffset + i];
     }
 }
+
+//void drawLineWithGap(uint8_t posY) {
+//    //uint8_t gapIndex = getTime() % (TOTPIXELX - 1);
+//    uint8_t gapIndex = 2;
+//    Buffer[posY] = 0;
+//    for (uint8_t i = 0; i < gapSize; i++) {
+//        Buffer[posY] |= (1 << (TOTPIXELX - gapIndex - 1 - i));
+//    }
+//    Buffer[posY] = ~Buffer[posY];
+//}
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
@@ -115,6 +126,7 @@ void animateBadge(void) {
     int8_t deltaAcc = 0;
     int16_t deltaTime = 100;
     while(1) {
+//        drawLineWithGap(5);
         displayPixel(ballX, ballY, ON);
         displayLatch();
         //This shows how to use non-blocking getTime() function
@@ -125,7 +137,6 @@ void animateBadge(void) {
         pollAccel();    //Tell kernel to read the accelerometer values
         if (AccXhigh < 0xF0 && AccXhigh >= 0x01) {
             moveLeft();
-            //deltaAcc = 0xF0 - AccXhigh;
         }
         if (AccXhigh > 0xF0 && AccXhigh <= 0xFE) {
             moveRight();
@@ -138,7 +149,6 @@ void animateBadge(void) {
         if (AccYhigh > 0xF0 && AccYhigh <= 0xFE) {
             moveDown();
         }
-        //deltaTime = 
         nextTime = getTime()+deltaTime;
         //Buffer[1] = AccXhigh;
         //Buffer[3] = AccYhigh;
