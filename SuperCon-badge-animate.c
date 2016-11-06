@@ -16,6 +16,8 @@
 
 uint8_t ballX = 4;
 uint8_t ballY = 3;
+const char msg[] = "HELLOZHOUTHISISIV";
+
 
 //Hint: look in HaD_Badge.h for function and constant definitions
 
@@ -87,7 +89,8 @@ void drawArrow(uint8_t rightOrLeft) {
 }
 
 extern uint8_t Retro8x16[1524];
-void drawChar(uint8_t dispChar) {
+void drawChar(uint8_t currPos) {
+    uint8_t dispChar = msg[currPos];
     uint16_t charOffset = (dispChar-65) * 16;
     for(uint8_t i = 0; i < 16; ++i) {
         Buffer[i] = Retro8x16[charOffset + i];
@@ -97,7 +100,8 @@ void drawChar(uint8_t dispChar) {
 void animateBadge(void) {
     //displayPixel(ballX, ballY, ON);
     //displayLatch();
-    uint8_t currChar = 'A';
+    uint8_t currChar = 0;
+    //uint8_t currChar = 'A';
     uint32_t nextTime = getTime();
 
     while(1) {
@@ -114,7 +118,6 @@ void animateBadge(void) {
         pollAccel();    //Tell kernel to read the accelerometer values
 //        if (AccXhigh < 0xF0) { drawArrow(1); } //Use high 8-bits of X value to decide what to do.
 //        else { drawArrow(0); }
-        
         //This shows how to get user input
         switch (getControl()) {
             case (ESCAPE):
@@ -122,17 +125,20 @@ void animateBadge(void) {
                 return;
             case (LEFT):
                 moveLeft();
+                if (currChar > 0)
+                --currChar;
                 break;
             case (RIGHT):
                 moveRight();
+                if (currChar < sizeof(msg))
+                ++currChar;
                 break;
             case (UP):
                 moveUp();
-                ++currChar;
+                
                 break;
             case (DOWN):
                 moveDown();
-                --currChar;
                 break;
         }
         
