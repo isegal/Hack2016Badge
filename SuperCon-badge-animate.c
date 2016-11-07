@@ -24,8 +24,8 @@ uint8_t WIDTH = 45;
 
 
 
-uint16_t ballX = (4<<FP_SHIFT);
-uint16_t ballY = (8<<FP_SHIFT);
+uint16_t ballX = (2<<FP_SHIFT);
+uint16_t ballY = (2<<FP_SHIFT);
 
 uint8_t lastBallX = 0;
 uint8_t lastBallY = 0;
