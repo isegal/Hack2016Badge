@@ -38,49 +38,56 @@ uint8_t coef = 1;
 extern uint8_t maze[210];
 void drawMaze(int8_t x, int8_t y) {
     for (uint8_t i = 0; i < TOTPIXELY; i++ ) {
-        if ((y + i) < 0) {
+        if ((y + i) < 0 || (y + i > HEIGHT)) {
             Buffer[i] = 0;
         } else {
             uint8_t byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + x / 8);
             uint8_t bitOffset = x % 8;
-//            if (x < 0) {
-//                Buffer[i] = maze[byteOffset] >> -1 * x;
-//            } else if (x > WIDTH - 8) {
-//                Buffer[i] = maze[byteOffset+1] << (x - WIDTH - 8);
-//            } else {
+            if (x < 0) {
+                Buffer[i] = maze[byteOffset] >> -1 * x;
+            } else if (x > WIDTH - 8) {
+                byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + (WIDTH - 8) / 8);
+                bitOffset = (WIDTH - 8) % 8;
+                Buffer[i] = (maze[byteOffset] << bitOffset | maze[byteOffset+1] >> (8 - bitOffset)) << (x - (WIDTH - 8));
+            } else {
                 Buffer[i] = maze[byteOffset] << bitOffset | maze[byteOffset+1] >> (8 - bitOffset);
-//            }
+            }
         }
     }
 }
+
+uint8_t worldPosX = 2;
+uint8_t worldPosY = 2;
 
 void updateBall() {
     uint8_t curX = FP_INTEGER_PART(ballX);
     uint8_t curY = FP_INTEGER_PART(ballY);
     if(curX != lastBallX || curY != lastBallY) {
-        displayPixel(lastBallX, lastBallY, OFF);
-        displayPixel(curX, curY, ON);
+        
+        worldPosX = curX;
+        worldPosY = curY;
+        
         lastBallX = curX;
         lastBallY = curY;
     }
 }
 
 void moveLeft() {
-    if (FP_INTEGER_PART(ballX) > 0) {
+    if (FP_INTEGER_PART(ballX) > 1) {
         //only move if we're not already at the edge
         ballX -= AccXhigh * coef;
     }
 }
 
 void moveRight() {
-    if (FP_INTEGER_PART(ballX) < TOTPIXELX-1) {
+    if (FP_INTEGER_PART(ballX) < WIDTH-1) {
         //only move if we're not already at the edge
         ballX += (0xFF - AccXhigh) * coef;
     }
 }
 
 void moveUp() {
-    if (FP_INTEGER_PART(ballY) > 0) {
+    if (FP_INTEGER_PART(ballY) > 1) {
         //only move if we're not already at the edge
         ballY -= AccYhigh * coef;
     }
@@ -88,7 +95,7 @@ void moveUp() {
 
 void moveDown() {
     //Limit ball travel to top 8 rows of the screen
-    if (FP_INTEGER_PART(ballY) < TOTPIXELY - 1) {
+    if (FP_INTEGER_PART(ballY) < HEIGHT - 1) {
         //only move if we're not already at the edge
         ballY += (0xFF - AccYhigh) * coef;
 
@@ -143,32 +150,32 @@ void animateBadge(void) {
         
         switch(getControl()) {
             case UP:
-                if (y > -3) {
+                if (y > -10) {
                     y--;
                 }
                 break;
             case DOWN:
-                if (y < HEIGHT - 16) {
+                if (y < HEIGHT - 6) {
                     y++;
                 }
                 break;
-                
             case RIGHT:
-                if (x < WIDTH - 8) {
+                if (x < WIDTH - 5) {
                     x++;
                 }
                 break;
             case LEFT:
-                if (x > 0) {
+                if (x > -3) {
                     x--;
                 }
                 break;
             default:
                 break;
         }
-        drawMaze(x, y);
-        // updateBall();
-        
+        updateBall();
+        drawMaze(worldPosX-4, worldPosY-7);
+        // displayPixel();
+        displayPixel(4, 7, ON);
     }
     }
 }
