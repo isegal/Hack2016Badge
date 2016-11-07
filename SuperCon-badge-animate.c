@@ -15,7 +15,7 @@
 #include "HaD_Badge.h"
 
 uint8_t HEIGHT = 35;
-uint8_t WIDTH = 45;
+uint8_t WIDTH = 46;
 
 #define FP_SHIFT 8 // 2^8 = 256
 #define FP_MASK ((1 << FP_SHIFT) - 1) // 256 (all LSB set, all MSB clear)
