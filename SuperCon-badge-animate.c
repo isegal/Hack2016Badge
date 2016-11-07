@@ -74,6 +74,9 @@ void updateBall() {
         
         lastBallX = curX;
         lastBallY = curY;
+        
+        // As long as we're moving, prevent entering low-power state
+        PowerCount = PowerOFF;
     }
 }
 
