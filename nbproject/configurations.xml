@@ -17,7 +17,6 @@
       <itemPath>SuperCon-badge-animate.c</itemPath>
       <itemPath>license.txt</itemPath>
       <itemPath>main.c</itemPath>
-      <itemPath>Retro8x16.c</itemPath>
       <itemPath>maze.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
