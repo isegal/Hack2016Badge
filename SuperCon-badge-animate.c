@@ -14,12 +14,23 @@
 
 #include "HaD_Badge.h"
 
-uint8_t ballX = 4;
-uint8_t ballY = 8;
-uint8_t gapSize = 2;
 uint8_t HEIGHT = 35;
 uint8_t WIDTH = 45;
 
+#define FP_SHIFT 8 // 2^8 = 256
+#define FP_MASK ((1 << FP_SHIFT) - 1) // 256 (all LSB set, all MSB clear)
+#define FP_INTEGER_PART(arg) (arg >> FP_SHIFT)
+#define FP_FRACTION_PART(arg) (arg & FP_MASK)
+
+
+
+uint16_t ballX = (4<<FP_SHIFT);
+uint16_t ballY = (8<<FP_SHIFT);
+
+uint8_t lastBallX = 0;
+uint8_t lastBallY = 0;
+
+uint8_t coef = 1;
 
 //Hint: look in HaD_Badge.h for function and constant definitions
 
@@ -40,6 +51,47 @@ void drawMaze(int8_t x, int8_t y) {
                 Buffer[i] = maze[byteOffset] << bitOffset | maze[byteOffset+1] >> (8 - bitOffset);
 //            }
         }
+    }
+}
+
+void updateBall() {
+    uint8_t curX = FP_INTEGER_PART(ballX);
+    uint8_t curY = FP_INTEGER_PART(ballY);
+    if(curX != lastBallX || curY != lastBallY) {
+        displayPixel(lastBallX, lastBallY, OFF);
+        displayPixel(curX, curY, ON);
+        lastBallX = curX;
+        lastBallY = curY;
+    }
+}
+
+void moveLeft() {
+    if (FP_INTEGER_PART(ballX) > 0) {
+        //only move if we're not already at the edge
+        ballX -= AccXhigh * coef;
+    }
+}
+
+void moveRight() {
+    if (FP_INTEGER_PART(ballX) < TOTPIXELX-1) {
+        //only move if we're not already at the edge
+        ballX += (0xFF - AccXhigh) * coef;
+    }
+}
+
+void moveUp() {
+    if (FP_INTEGER_PART(ballY) > 0) {
+        //only move if we're not already at the edge
+        ballY -= AccYhigh * coef;
+    }
+}
+
+void moveDown() {
+    //Limit ball travel to top 8 rows of the screen
+    if (FP_INTEGER_PART(ballY) < TOTPIXELY - 1) {
+        //only move if we're not already at the edge
+        ballY += (0xFF - AccYhigh) * coef;
+
     }
 }
 
@@ -69,35 +121,25 @@ void animateBadge(void) {
         }
         //Use accelerometer to draw left or right arrow for X axis
         pollAccel();    //Tell kernel to read the accelerometer values
-        if (AccXhigh < 0xF0 && AccXhigh >= 0x01) {
-            direction = LEFT;
+        nextTime = getTime()+deltaTime;
+    
+    updateBall();
+    while(1) {
+        
+        pollAccel();    //Tell kernel to read the accelerometer values
+        if (AccXhigh < 0xF0) {
+            moveLeft();
+        }
+        if (AccXhigh > 0xF0) {
+            moveRight();
+        }
+        if (AccYhigh < 0xF0) {
+            moveUp();   
             
         }
-        if (AccXhigh > 0xF0 && AccXhigh <= 0xFE) {
-            direction = RIGHT;
+        if (AccYhigh > 0xF0) {
+            moveDown();
         }
-        if (AccYhigh < 0xF0 && AccYhigh >= 0x01) {
-            direction = UP;
-        }
-        if (AccYhigh > 0xF0 && AccYhigh <= 0xFE) {
-            direction = DOWN;
-        }
-        nextTime = getTime()+deltaTime;
-
-        
-//        switch (getControl()) {
-//            case (ESCAPE):
-//                displayClose();
-//                return;
-//            case (UP):
-//                deltaTime += 20;
-//                break;
-//            case (DOWN):
-//                deltaTime -= 20;
-//                break;
-//            default:
-//                break;
-//        }
         
         switch(getControl()) {
             case UP:
@@ -110,6 +152,7 @@ void animateBadge(void) {
                     y++;
                 }
                 break;
+                
             case RIGHT:
                 if (x < WIDTH - 8) {
                     x++;
@@ -124,6 +167,9 @@ void animateBadge(void) {
                 break;
         }
         drawMaze(x, y);
+        // updateBall();
+        
+    }
     }
 }
 

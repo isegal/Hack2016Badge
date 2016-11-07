@@ -9,7 +9,7 @@
 #ifndef SUPERCON-BADGE-ANIMATE_H
 #define	SUPERCON-BADGE-ANIMATE_H
 
- #include "HaD_Badge.h"
+#include "HaD_Badge.h"
 
 //Add your function protopes:
 void eraseBall(void);
