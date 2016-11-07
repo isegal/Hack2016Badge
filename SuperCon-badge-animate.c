@@ -30,7 +30,7 @@ uint16_t ballY = (8<<FP_SHIFT);
 uint8_t lastBallX = 0;
 uint8_t lastBallY = 0;
 
-uint8_t coef = 1;
+uint8_t coef = 6;
 
 //Hint: look in HaD_Badge.h for function and constant definitions
 
@@ -56,8 +56,8 @@ void drawMaze(int8_t x, int8_t y) {
     }
 }
 
-uint8_t worldPosX = 2;
-uint8_t worldPosY = 2;
+uint8_t worldPosX = 0;
+uint8_t worldPosY = 0;
 
 void updateBall() {
     uint8_t curX = FP_INTEGER_PART(ballX);
