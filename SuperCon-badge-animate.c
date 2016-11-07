@@ -33,7 +33,12 @@ uint8_t lastBallY = 0;
 uint8_t coef = 6;
 
 //Hint: look in HaD_Badge.h for function and constant definitions
-
+uint8_t isLit(uint8_t x, uint8_t y) {
+     if (Buffer[y] & (1 << (7 - x))) {
+         return 1;
+     }
+     return 0;
+ }
 
 extern uint8_t maze[210];
 void drawMaze(int8_t x, int8_t y) {
@@ -134,17 +139,17 @@ void animateBadge(void) {
     while(1) {
         
         pollAccel();    //Tell kernel to read the accelerometer values
-        if (AccXhigh < 0xF0) {
+        if (AccXhigh < 0xF0 && !isLit(3, 7)) {
             moveLeft();
         }
-        if (AccXhigh > 0xF0) {
+        if (AccXhigh > 0xF0 && !isLit(5, 7)) {
             moveRight();
         }
-        if (AccYhigh < 0xF0) {
+        if (AccYhigh < 0xF0 && !isLit(4, 6)) {
             moveUp();   
             
         }
-        if (AccYhigh > 0xF0) {
+        if (AccYhigh > 0xF0 && !isLit(4, 8)) {
             moveDown();
         }
         
