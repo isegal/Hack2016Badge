@@ -25,10 +25,10 @@ uint8_t WIDTH = 45;
 
 
 extern uint8_t maze[210];
-void drawMaze(uint8_t x, uint8_t y) {
+void drawMaze(int8_t x, int8_t y) {
     for (uint8_t i = 0; i < TOTPIXELY; i++ ) {
         if ((y + i) < 0) {
-            Buffer[i] = 1;
+            Buffer[i] = 0;
         } else {
             uint8_t byteOffset = ((y + i) * ((WIDTH + WIDTH % 8) / 8) + x / 8);
             uint8_t bitOffset = x % 8;
@@ -45,8 +45,8 @@ void drawMaze(uint8_t x, uint8_t y) {
 
 void animateBadge(void) {
 
-    uint8_t x = 0;
-    uint8_t y = 0;
+    int8_t x = 0;
+    int8_t y = 0;
     
     uint32_t nextTime = getTime();
     
@@ -85,21 +85,21 @@ void animateBadge(void) {
         nextTime = getTime()+deltaTime;
 
         
-        switch (getControl()) {
-            case (ESCAPE):
-                displayClose();
-                return;
-            case (UP):
-                deltaTime += 20;
-                break;
-            case (DOWN):
-                deltaTime -= 20;
-                break;
-            default:
-                break;
-        }
+//        switch (getControl()) {
+//            case (ESCAPE):
+//                displayClose();
+//                return;
+//            case (UP):
+//                deltaTime += 20;
+//                break;
+//            case (DOWN):
+//                deltaTime -= 20;
+//                break;
+//            default:
+//                break;
+//        }
         
-        switch(direction) {
+        switch(getControl()) {
             case UP:
                 if (y > -3) {
                     y--;
