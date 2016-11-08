@@ -24,10 +24,10 @@ uint8_t WIDTH = 46;
 
 uint8_t digits[] = {
     0x1f,0x11,0x1f, // 0
-    0x00,0x00,0x1f, // 1
+    0x00,0x1f,0x00, // 1
     0x1d,0x15,0x17, // 2
     0x15,0x15,0x1f, // 3
-    0x1c,0x04,0x1f, // 4
+    0x07,0x04,0x1f, // 4
     0x17,0x15,0x1d, // 5
     0x1f,0x15,0x1d, // 6
     0x01,0x01,0x1f, // 7
@@ -35,6 +35,45 @@ uint8_t digits[] = {
     0x17,0x15,0x1f, // 9
  
 };
+
+void drawDigit(uint8_t pos, uint8_t val) {
+    uint8_t offset = val * 3;
+    Buffer[pos] = digits[offset];
+    Buffer[pos+1] = digits[offset+1];
+    Buffer[pos+2] = digits[offset+2];
+}
+
+void timeDisplay(uint32_t timeVal) {
+    if(timeVal > 999999) {
+        timeVal = 999999;
+    }
+    // tenth of a second value
+    uint8_t tenths = (timeVal % 1000) / 100;
+    uint16_t seconds = timeVal / 1000;
+    
+    Buffer[12] = 0b000100000;
+    
+    uint8_t digit = seconds % 10;
+    
+    drawDigit(8, digit);
+    
+    
+    seconds /= 10;
+    digit = seconds % 10;
+    
+    if(digit || seconds) {
+        drawDigit(4, digit);
+    }
+    
+    seconds /= 10;
+    digit = seconds % 10;
+    if(digit) {
+        drawDigit(0, digit);
+    }
+    
+    drawDigit(13, tenths);
+    
+}
 
 uint16_t ballX = (2<<FP_SHIFT);
 uint16_t ballY = (2<<FP_SHIFT);
@@ -138,17 +177,6 @@ void animateBadge(void) {
     int16_t xAccel;
     
     int16_t deltaTime = 100;
-    while(1) {
-
-        //This shows how to use non-blocking getTime() function
-        
-        uint8_t direction;
-        if (getTime() <= nextTime) {
-            continue;
-        }
-        //Use accelerometer to draw left or right arrow for X axis
-        pollAccel();    //Tell kernel to read the accelerometer values
-        nextTime = getTime()+deltaTime;
     
     updateBall();
     while(1) {
@@ -196,7 +224,6 @@ void animateBadge(void) {
         drawMaze(worldPosX-4, worldPosY-7);
         // displayPixel();
         displayPixel(4, 7, ON);
-    }
     }
 }
 
