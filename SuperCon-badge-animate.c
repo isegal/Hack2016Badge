@@ -22,7 +22,19 @@ uint8_t WIDTH = 46;
 #define FP_INTEGER_PART(arg) (arg >> FP_SHIFT)
 #define FP_FRACTION_PART(arg) (arg & FP_MASK)
 
-
+uint8_t digits[] = {
+    0x1f,0x11,0x1f, // 0
+    0x00,0x00,0x1f, // 1
+    0x1d,0x15,0x17, // 2
+    0x15,0x15,0x1f, // 3
+    0x1c,0x04,0x1f, // 4
+    0x17,0x15,0x1d, // 5
+    0x1f,0x15,0x1d, // 6
+    0x01,0x01,0x1f, // 7
+    0x1f,0x15,0x1f, // 8
+    0x17,0x15,0x1f, // 9
+ 
+};
 
 uint16_t ballX = (2<<FP_SHIFT);
 uint16_t ballY = (2<<FP_SHIFT);
@@ -111,7 +123,7 @@ void moveDown() {
 }
 
 void animateBadge(void) {
-
+    
     int8_t x = 0;
     int8_t y = 0;
     
