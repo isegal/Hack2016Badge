@@ -75,6 +75,15 @@ void timeDisplay(uint32_t timeVal) {
     
 }
 
+void endGame() {
+    
+    for(uint8_t i = 0; i < 16; ++i) {
+        Buffer[i] = 0;
+    }
+    timeDisplay(getTime() >> 1);
+    while(1) { }
+}
+
 uint16_t ballX = (2<<FP_SHIFT);
 uint16_t ballY = (2<<FP_SHIFT);
 
@@ -146,9 +155,13 @@ void moveRight() {
 }
 
 void moveUp() {
-    if (FP_INTEGER_PART(ballY) > 1) {
+    if (FP_INTEGER_PART(ballY) > 0) {
         //only move if we're not already at the edge
         ballY -= AccYhigh * coef;
+        
+        if(FP_INTEGER_PART(ballY) == 0) {
+            endGame();
+        }
     }
 }
 
@@ -166,8 +179,6 @@ void animateBadge(void) {
     int8_t x = 0;
     int8_t y = 0;
     
-    uint32_t nextTime = getTime();
-    
     int16_t tempMinAccel = 0;
     int16_t tempMaxAccel = 0;
     
@@ -176,7 +187,7 @@ void animateBadge(void) {
     
     int16_t xAccel;
     
-    int16_t deltaTime = 100;
+    
     
     updateBall();
     while(1) {
