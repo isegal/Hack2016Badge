@@ -1,3 +1,32 @@
+"Most Blinky" category badge hack winner.
+====================================================
+
+For our contest entry we decided to have some fun with the built-in accelerometer
+and create a ball maze game.
+
+![HackyBall Game in action](https://raw.githubusercontent.com/isegal/Hack2016Badge/integ/1dq60e.gif?token=AEWaYQo7mp6x1oktZ2vzkccJil3rjstqks5YLT0UwA%3D%3D)
+
+The objective is to get to the end of the maze as quickly as possible.
+
+Hackaday 2016 SuperConference badge was truly a work of art. Aside from such a great,
+aesthetically pleasing design, it featured an accelerometer, six buttons and an IR
+tranciever.
+
+The hack was put together by Devops team at Graphiq.
+
+[Graphiq](https://www.graphiq.com) Devops team is:
+
+[Ivgeni "Iv" Segal](https://github.com/isegal)
+
+[Zhou Tan](https://github.com/JohanTan)
+
+[Tizoc Franco](https://github.com/TizocFranco)
+
+If you were one of the attendees or have access to the HackADay badge, the original installation
+instructions are below.
+
+Big thanks to Hackaday.io for putting together such an amazing event!
+
 2016 Hackaday SuperConference Badge Hacking Template
 ====================================================
 
